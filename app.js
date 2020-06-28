@@ -8,8 +8,8 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static("public"));
 app.set("view engine","ejs");
 
-const bio =[];
-const name = [];
+let bio ="";
+let name = "";
 let score = 0;
 
 app.get("/login",function(req,res){
@@ -57,7 +57,7 @@ app.post("/",function(req,res){
 
 
 app.get("/profile",function(req,res){
-    res.render("profile",{profileBio:bio[0],profileName:name[0],profileScore:score});
+    res.render("profile",{profileBio:bio,profileName:name,profileScore:score});
 });
 
 app.get("/profile-edit",function(req,res){
@@ -65,16 +65,14 @@ app.get("/profile-edit",function(req,res){
 });
 
 app.post("/profile-edit",function(req,res){
-    name.pop();
-    name.push(req.body.profileName);
-    bio.pop();
-    bio.push(req.body.bioPara);
-    res.render("profile",{profileBio: bio[0],profileName:name[0],profileScore:score});
+    name= req.body.profileName;
+    bio= req.body.bioPara;
+    res.render("profile",{profileBio: bio,profileName:name,profileScore:score});
 })
 
 
 app.get("/rank",function(req,res){
-    res.render("rank",{profileName:name[0],profileScore:score});
+    res.render("rank",{profileName:name,profileScore:score});
 });
 
 
