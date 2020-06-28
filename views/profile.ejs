@@ -1,0 +1,17 @@
+<%- include("partials/header") -%>
+
+
+
+<div class="profile-body">
+    <div class="profile-box">
+        <a href="/"><p>← Back to Game</p></a>
+        <a href="/profile-edit" style="float: right;"><p>Edit</p></a>
+        <h1><%= profileName %></h1>
+        <h5>HighScore - <%=profileScore %> pts</h5>
+        <p style="margin-top: 10px;">Bio: "<%= profileBio %>"</p>
+    </div>
+</div>
+
+
+
+<%- include("partials/footer") -%>
