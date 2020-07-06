@@ -3,12 +3,13 @@
 
 
 <div class="profile-body">
+    <%= typeof msg != "undefined" ? msg : "" %>
     <form class="profile-box" method="post">
-        <input type="submit" value="Save">
-        <input type="text" name="profileName"  placeholder="Username">
-        <h5>HighScore - <%=profileScore %> pts</h5>
+        <!-- <input name="profileImage" type="file"> -->
+        <input type="text" name="profileName" value="<%= profileName %>"  placeholder="Username">
         <h3>Bio</h3>
         <textarea class="bio" name="bioPara" rows="4" cols="50"></textarea>
+        <input type="submit" value="Save">
     </form>
 </div>
 
