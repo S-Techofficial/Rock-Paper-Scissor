@@ -1,17 +1,21 @@
 <%- include("partials/header") -%>
 
 <div class="rank-box">
-    <a href="/"><p>← Back to Game</p></a>
+    <a href="/<%= id %>"><p>← Back to Game</p></a>
     <div class="score-head">
         <h3>Player</h3>
         <h3>Score</h3>
     </div>
     <hr>
     <div class="score-list">
-        <ul>
-            <li><%=profileUser.username%></li>
-            <li><%=profileUser.score%> pts</li>
-        </ul>
+        <% profile.forEach(function(user){ %>
+                <ul>
+                    <li><%= user.username %></li>
+                    <li><%= user.score %> pts</li>
+                </ul>
+        <% });  %>
+
+        
     </div>
     
 </div>

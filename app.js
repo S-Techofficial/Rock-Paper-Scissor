@@ -1,180 +1,125 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
-const multer = require("multer");
-const path = require("path");
 const mongoose = require("mongoose");
-
-// // Set Storage Engine
-// const storage = multer.diskStorage({
-//     destination:"./public/uploads/",
-//     filename: function(req,file,cb){
-//         cb(null,file.fieldname + "-" + Date.now() + path.extname(file.originalname));
-//     }
-// })
-
-// // Initialize upload
-// const upload = multer({
-//     storage:storage,
-//     limits:{fileSize: 1000000},
-//     fileFilter: function(req,file, cb){
-//         checkFileType(file,cb);
-//     }
-// }).single('profileImage');
-
-// // checkFileType function
-// function checkFileType(file,cb){
-//     //Allowed extensions
-//     const fileType = /jpeg|jpg|png|gif/;
-//     // check extension
-//     const extname = fileType.test(path.extname(file.originalname).toLowerCase());
-//     // check mime
-//     const mimeType = fileType.test(file.mimetype);
-
-//     if(mimeType && extname){
-//         return cb(null,true);
-//     }else{
-//         cb("Images only!");
-//     }
-// }
-
-
-
-const app = express();
-app.use(bodyParser.urlencoded({extended:true}));
-app.use(express.static("public"));
-app.set("view engine","ejs");
 
 mongoose.connect('mongodb://localhost:27017/gameDB',{useNewUrlParser:true, useUnifiedTopology:true});
 
 
 
 const userSchema = {
-    username:String,
-    password:String,
-    bio:String,
-    score:Number
+    username:{type:String,trim:true,default:''},
+    password:{type:String,default:''},
+    bio:{type:String,default:''},
+    score:{type:Number,default:0}
 }
 
 
 const User = mongoose.model('User',userSchema);
 
+const app = express();
+app.use(bodyParser.urlencoded({extended:true}));
+app.use(express.static("public"));
+app.set("view engine","ejs");
+mongoose.set('useFindAndModify', false);
 
 
-app.get("/login",function(req,res){
-    res.render("login");
-});
-
-app.post("/login",function(req,res){
-    const name = res.body.username;
-    const password = res.body.password;
-    User.findOne({username:name},function(err,foundUser){
-        if(err){
-            console.log(err);
-        }else{
-            if(foundUser.password === password){
-                res.redirect("/");
-            }else{
-                res.redirect("/login");
-            }
-        }
-    })
-});
-
-
-app.get("/signup",function(req,res){
+app.get("/signup",(req,res) => {
     res.render("signup");
-});
+})
 
-app.post("/signup",function(req,res){
-    const name = res.body.username;
-    const password = res.body.password; 
+app.post("/signup",(req,res) => {
+    const name = req.body.username;
+    const password = req.body.password;
     const player = new User({
-        username: name,
-        password: password
+        username:name,
+        password:password
     });
     player.save(function(err){
         if(err){
             console.log(err);
+        }else{
+            res.render("profile",{user:player});
         }
     });
-    res.redirect("/profile-edit")
 });
 
 
-
-app.get("/",function(req,res){
-    res.render("play");
-});
-
-app.post("/:userId",function(req,res){
-    const requestedId = req.params.userId;
-    const scoreTemp = req.body.number;
-    User.findOneAndUpdate({_id:requestedId},{$set:{score:scoreTemp}})
+app.get("/login",(req,res) => {
+    res.render("login");
 })
 
-
-
-
-app.get("/profile/:userId",function(req,res){
-    const requestedId = req.params.userId;
-    User.findOne({_id:requestedId},function(err,foundUser){
+app.post("/login",(req,res) => {
+    const name = req.body.username;
+    const password = req.body.password;
+    User.findOne({username:name},function(err,foundUser){
         if(!err){
-            res.render("profile",{profileBio:foundUser.bio,
-                profileName:foundUser.username,
-                profileScore:foundUser.score});
+            if(foundUser.password === password){
+                res.render("play",{user:foundUser});
+            }
+        }else{
+            res.redirect("/login");
+        }
+    });
+});
 
+
+
+
+app.get("/:userId",(req,res) => {
+    const id = req.params.userId;
+    User.findOne({_id:id},function(err,foundUser){
+        if(!err){
+            res.render("play",{user:foundUser});
         }
     })
 });
 
 
-app.get("/profile-edit",function(req,res){
-    res.render("profile-edit")
-});
-
-app.post("/profile-edit",function(req,res){
-    bio= req.body.bioPara;
-    // upload(req,res,(err) => {
-    //     if(err){res.render("profile",{msg:err});
-    //     }else{
-    //         if(req.file == undefined){
-    //             res.render("profile",{
-    //                 msg:"No file selected!",
-    //                 profileBio: bio,
-    //                 profileName:name,
-    //                 profileScore:score
-    //             });
-    //         }else{
-    //             res.render("profile",{
-    //                 msg:"file uploaded successfully!",
-    //                 file:`uploads/${req.file.filename}`,
-    //                 profileBio: bio,
-    //                 profileName:name,
-    //                 profileScore:score
-    //             })
-    //         }
-    //     }
-    // });
-    User.findOneAndUpdate({},{$set:{bio:bio},function(err,foundUser){
-        if(!err){
-            res.render("profile",{profileBio:foundUser.bio,profileName:foundUser.username,profileScore:foundUser.score})
+app.post("/:userId",(req,res) => {
+    const id = req.params.userId;
+    const scoreData = Number(req.body.highScore);
+    User.findOneAndUpdate({_id:id},{$set:{score:scoreData}},function(err,foundUser){
+        if(err){
+            console.log(err);
         }
-    }})
-    
+    });
 })
 
 
 
-app.get("/rank",function(req,res){
-    User.find({},function(err,foundUser){
+app.get("/profile/:profileId",(req,res) => {
+    const requestId = req.params.profileId;
+    User.findOne({_id:requestId},function(err,foundUser){
         if(!err){
-            foundUser.forEach(function(user){
-                res.render("rank",{profileUser:user});
-            })
-        }
-    })
+            res.render("profile",{user:foundUser});
+            console.log(foundUser);
+        }    
+    });
+});
 
+app.get("/profile/:profileId/edit",(req,res) => {
+    const requestId = req.params.profileId;
+    res.render("edit",{user:requestId});
+});
+
+app.post("/profile/:profileId/edit",(req,res) => {
+    const requestId = req.params.profileId;
+    const editedBio = req.body.bioPara;
+    User.findOneAndUpdate({_id:requestId},{$set:{bio:editedBio}},(err,foundUser) => {
+        res.render("profile",{user:foundUser});
+    });
+})
+
+app.get("/rank/:userId",(req,res) => {
+    const userId = req.params.userId;
+    User.find({"score":{$ne:null}},function(err,result){
+        if(!err){
+            res.render("rank",{profile:result,id:userId});
+        }else{
+            console.log(err);
+        }
+    });
 });
 
 

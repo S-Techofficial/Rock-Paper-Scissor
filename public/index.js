@@ -1,10 +1,11 @@
+
 document.querySelector(".second").classList.add("visible");
 document.querySelector(".final").classList.add("visible");
 document.querySelector(".rule-container").classList.add("visible");
 
 
 
-
+let highscore = 0;
 let score = 0;
 const buttonOptions=["red","blue","yellow"];
 
@@ -101,6 +102,7 @@ function compareColours(player,bot){
     if(player==="red" && bot==="yellow" || player==="yellow" && bot==="blue" || player==="blue" && bot==="red"){
         document.querySelector(".declare h1").innerText="YOU WIN";
         score++;
+        highscore++;
         document.querySelector(".play-div button.player").classList.add("win");
         document.querySelector(".play-div button.bot").classList.remove("win");
     }
@@ -121,7 +123,7 @@ document.querySelector(".declare button").addEventListener("click",function(){
     document.querySelector(".final").classList.add("visible");
     document.querySelector(".first").classList.remove("visible");
     document.querySelector(".score h1").innerText=score;
-
+    document.querySelector(".score input").setAttribute("value",highscore);
 });
 
 
@@ -142,3 +144,4 @@ document.querySelector(".rule-box").addEventListener("click",function(){
     }
 
 });
+
